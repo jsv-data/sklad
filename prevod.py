@@ -22,10 +22,14 @@ LILI_START = {"IVORY": 49, "CERVENA": 54, "MODRA": 59}
 def kod_varianty(kod, barva, vel):
     i = SIZES.index(vel)
     return f"{kod}-{LILI_START[barva] + i}" if barva else f"{kod}-{i + 1}"
+UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36"
 def nacti():
     csv.field_size_limit(10**9)
-    req = urllib.request.Request(os.environ["FEED_URL"], headers={"User-Agent": "curl/8.0"})
-    raw = urllib.request.urlopen(req, timeout=180).read().decode("utf-8", "replace")
+    if os.environ.get("FEED_FILE") and os.path.exists(os.environ["FEED_FILE"]):
+        raw = open(os.environ["FEED_FILE"], encoding="utf-8", errors="replace").read()
+    else:
+        req = urllib.request.Request(os.environ["FEED_URL"], headers={"User-Agent": UA, "Accept": "text/csv,*/*"})
+        raw = urllib.request.urlopen(req, timeout=180).read().decode("utf-8", "replace")
     feed = {r["id"]: r for r in csv.DictReader(io.StringIO(raw), delimiter=";")}
     if len(feed) < 100: raise SystemExit("Zdroj je podezrele maly, soubor neprepisuji.")
     return feed
